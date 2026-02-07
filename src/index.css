@@ -73,10 +73,14 @@ h1 {
   font-family: var(--font-main);
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
   box-shadow: 0 4px 15px rgba(225, 29, 72, 0.2);
   white-space: nowrap;
-  /* Prevent text wrapping inside buttons */
+  /* Prevent text selection and tap highlight */
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
 .btn-primary {
@@ -85,6 +89,24 @@ h1 {
   font-size: 1.5rem;
   z-index: 2;
   /* Keep yes button above */
+}
+
+.btn-primary.heartbeat {
+  animation: heartbeat 0.4s ease-in-out;
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .btn-primary:hover {

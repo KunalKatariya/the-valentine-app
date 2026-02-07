@@ -9,6 +9,8 @@ export default function App() {
 
   // Replace x/y transform state with explicit style state for Fixed positioning
   const [noButtonStyle, setNoButtonStyle] = useState({});
+  const [noButtonInitialized, setNoButtonInitialized] = useState(false);
+  const [heartbeatKey, setHeartbeatKey] = useState(0);
 
   // State for mobile detection & window size
   const [isMobile, setIsMobile] = useState(false);
@@ -207,8 +209,11 @@ export default function App() {
     if (e && e.preventDefault) e.preventDefault();
     setNoCount(prev => prev + 1);
 
-    // switch to fixed positioning to guarantee bounds
-    const btnWidth = 250; // conservative max width
+    if (isMobile) {
+      setHeartbeatKey(prev => prev + 1);
+    }
+
+    const btnWidth = 200;
     const btnHeight = 60;
     const padding = 20;
 
@@ -220,11 +225,14 @@ export default function App() {
     const randomX = Math.max(minX, minX + Math.random() * (maxX - minX));
     const randomY = Math.max(minY, minY + Math.random() * (maxY - minY));
 
+    if (!noButtonInitialized) {
+      setNoButtonInitialized(true);
+    }
+
     setNoButtonStyle({
       position: 'fixed',
       left: `${randomX}px`,
       top: `${randomY}px`,
-      // Ensure it floats above everything
       zIndex: 50,
     });
   }
@@ -244,7 +252,7 @@ export default function App() {
             style={{ maxWidth: '300px', borderRadius: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
           />
           <h1 className="success-message" style={{ marginTop: '2rem', fontSize: '3rem' }}>
-            YAYYY!!!! I knew it!! ❤️
+            YAYYY!!!! {isMobile && <br />} I knew it!! ❤️
           </h1>
           <p style={{ fontSize: '1.5rem', marginTop: '1rem', color: '#db2777' }}>
             See? It wasn't that hard! 😉
@@ -263,9 +271,11 @@ export default function App() {
 
           <h1>Will you be my Valentine?</h1>
 
-          <div className="btn-container">
+          <div className="btn-container" style={{ position: 'relative' }}>
             <motion.button
-              className="btn btn-primary"
+              key={heartbeatKey}
+              className={`btn btn-primary ${isMobile && heartbeatKey > 0 ? 'heartbeat' : ''}`}
+              initial={{ scale: yesButtonScale }}
               animate={{ scale: yesButtonScale }}
               whileHover={{ scale: yesButtonScale * 1.1 }}
               whileTap={{ scale: yesButtonScale * 0.9 }}
@@ -274,19 +284,19 @@ export default function App() {
               Yes
             </motion.button>
 
-            <motion.button
-              className="btn btn-secondary"
-              onMouseEnter={moveNoButton}
-              onClick={moveNoButton}
-              onTouchStart={moveNoButton} // For mobile
-              // Apply fixed style when moving
-              style={noButtonStyle}
-              // Animate layout changes
-              animate={noButtonStyle}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            >
-              {getNoButtonText()}
-            </motion.button>
+            <div style={{ minWidth: isMobile ? '100%' : '180px', display: 'flex', justifyContent: 'center' }}>
+              <motion.button
+                className="btn btn-secondary"
+                onMouseEnter={moveNoButton}
+                onClick={moveNoButton}
+                onTouchStart={moveNoButton}
+                style={noButtonStyle}
+                animate={noButtonStyle}
+                transition={{ type: "spring", stiffness: 450, damping: 25 }}
+              >
+                {getNoButtonText()}
+              </motion.button>
+            </div>
           </div>
         </>
       )}
