@@ -166,6 +166,11 @@ export default function App() {
 
   function handleYesClick() {
     setYesPressed(true);
+
+    // Play celebration sound
+    const audio = new Audio('/Yay-sound.mp3');
+    audio.play().catch(err => console.log('Audio play failed:', err));
+
     confetti({
       particleCount: 150,
       spread: 70,
