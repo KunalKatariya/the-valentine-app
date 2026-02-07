@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import './index.css';
@@ -6,9 +6,22 @@ import './index.css';
 export default function App() {
   const [noCount, setNoCount] = useState(0);
   const [yesPressed, setYesPressed] = useState(false);
-  const [noPosition, setNoPosition] = useState({ x: 0, y: 0 });
 
-  const yesButtonScale = 1 + (noCount * 0.2);
+  // Replace x/y transform state with explicit style state for Fixed positioning
+  const [noButtonStyle, setNoButtonStyle] = useState({});
+
+  // State for mobile detection & window size
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Correctly use useEffect for window resize listener
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile(); // Check immediately
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const yesButtonScale = isMobile ? 1 : 1 + (noCount * 0.2);
 
   const phrases = [
     "No",
@@ -71,11 +84,30 @@ export default function App() {
     }());
   }
 
-  function moveNoButton() {
-    setNoCount(prev => prev + 1); // Increment count to grow Yes button!
-    const x = Math.random() * (window.innerWidth - 200) - (window.innerWidth / 2 - 100);
-    const y = Math.random() * (window.innerHeight - 200) - (window.innerHeight / 2 - 100);
-    setNoPosition({ x, y });
+  function moveNoButton(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    setNoCount(prev => prev + 1);
+
+    // switch to fixed positioning to guarantee bounds
+    const btnWidth = 250; // conservative max width
+    const btnHeight = 60;
+    const padding = 20;
+
+    const minX = padding;
+    const maxX = window.innerWidth - btnWidth - padding;
+    const minY = padding;
+    const maxY = window.innerHeight - btnHeight - padding;
+
+    const randomX = Math.max(minX, minX + Math.random() * (maxX - minX));
+    const randomY = Math.max(minY, minY + Math.random() * (maxY - minY));
+
+    setNoButtonStyle({
+      position: 'fixed',
+      left: `${randomX}px`,
+      top: `${randomY}px`,
+      // Ensure it floats above everything
+      zIndex: 50,
+    });
   }
 
   return (
@@ -128,10 +160,10 @@ export default function App() {
               onMouseEnter={moveNoButton}
               onClick={moveNoButton}
               onTouchStart={moveNoButton} // For mobile
-              animate={{
-                x: noPosition.x,
-                y: noPosition.y
-              }}
+              // Apply fixed style when moving
+              style={noButtonStyle}
+              // Animate layout changes
+              animate={noButtonStyle}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
               {getNoButtonText()}

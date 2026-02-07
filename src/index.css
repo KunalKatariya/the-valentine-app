@@ -116,7 +116,7 @@ h1 {
   position: absolute;
   font-size: 1.5rem;
   opacity: 0.6;
-  animation: floatUp 15s linear infinite;
+  animation: floatUp 15s linear infinite both;
 }
 
 @keyframes floatUp {
